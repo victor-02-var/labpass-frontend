@@ -1,19 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import { socket } from '../services/socket';
 import { QRCodeSVG } from 'qrcode.react';
-import { Trash2, Download, Smartphone, ShieldAlert, CheckCircle, Loader2, FileIcon, Link2, Share2 } from 'lucide-react';
+import { Trash2, Download, Smartphone, ShieldAlert, CheckCircle, Loader2, FileIcon, Link2, Share2, Clock } from 'lucide-react';
+
+const AUTO_DELETE_MS = 3 * 60 * 1000; // 3 Minutes in milliseconds
 
 const HostView = ({ sessionId }) => {
   const [isConnected, setIsConnected] = useState(false);
   const [receivedFiles, setReceivedFiles] = useState([]);
+  const [now, setNow] = useState(Date.now()); // Used to trigger re-renders for the countdown
 
-  // IMPORTANT: Replace the string below with your deployed Frontend URL (e.g., Vercel/Netlify)
-  // If testing locally across networks, use your PC's IP or an ngrok tunnel for the frontend.
+  // IMPORTANT: Replace with your actual Frontend URL
   const FRONTEND_URL = "https://labpass-frontend.vercel.app"; 
   const shareUrl = `${FRONTEND_URL}?sid=${sessionId}`;
 
   useEffect(() => {
-    // Manually connect since autoConnect is false in socket.js
     socket.connect();
 
     socket.on("connect", () => {
@@ -26,12 +27,18 @@ const HostView = ({ sessionId }) => {
     });
 
     socket.on("receive-file", (fileData) => {
-      setReceivedFiles(prev => [...prev, fileData]);
+      // Add an ID and Expiry Timestamp to every new file
+      const newFile = {
+        ...fileData,
+        id: Date.now() + Math.random(), // Unique ID
+        receivedAt: Date.now(),
+        expiresAt: Date.now() + AUTO_DELETE_MS
+      };
+      setReceivedFiles(prev => [...prev, newFile]);
     });
 
     socket.on("force-wipe", handleNuke);
 
-    // Handle connection errors (common on Render free tier)
     socket.on("connect_error", (err) => {
       console.error("Connection Error:", err.message);
     });
@@ -45,6 +52,27 @@ const HostView = ({ sessionId }) => {
     };
   }, [sessionId]);
 
+  // Timer Effect: Updates 'now' every second and filters out expired files
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const currentTime = Date.now();
+      setNow(currentTime);
+
+      setReceivedFiles(prevFiles => {
+        // Filter out files where expiresAt has passed
+        const validFiles = prevFiles.filter(f => f.expiresAt > currentTime);
+        
+        // Only update state if files were actually removed (prevents unnecessary re-renders)
+        if (validFiles.length !== prevFiles.length) {
+          return validFiles;
+        }
+        return prevFiles;
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
+
   const handleNuke = () => {
     localStorage.removeItem("lab_session_id");
     window.location.reload();
@@ -57,6 +85,21 @@ const HostView = ({ sessionId }) => {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  };
+
+  // Helper to calculate width of the progress bar
+  const getProgressWidth = (expiresAt) => {
+    const timeLeft = expiresAt - now;
+    const percentage = (timeLeft / AUTO_DELETE_MS) * 100;
+    return Math.max(0, Math.min(100, percentage));
+  };
+
+  // Helper to format time left text
+  const formatTimeLeft = (expiresAt) => {
+    const secondsLeft = Math.max(0, Math.ceil((expiresAt - now) / 1000));
+    const mins = Math.floor(secondsLeft / 60);
+    const secs = secondsLeft % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
   return (
@@ -95,7 +138,6 @@ const HostView = ({ sessionId }) => {
               <div className="absolute -bottom-2 -right-2 w-6 h-6 border-b-2 border-r-2 border-cyan-500/50 rounded-br-lg" />
               
               <div className="p-4 bg-white rounded-2xl shadow-[0_0_50px_rgba(34,211,238,0.15)] transition-all duration-500 hover:scale-[1.02]">
-                {/* QR Code now points to the public FRONTEND_URL */}
                 <QRCodeSVG value={shareUrl} size={180} level="H" />
               </div>
             </div>
@@ -115,14 +157,25 @@ const HostView = ({ sessionId }) => {
           <div className="px-8 pb-8">
             {receivedFiles.length > 0 ? (
               <div className="space-y-4">
-                {receivedFiles.map((file, index) => (
-                  <div key={index} className="bg-cyan-400 text-zinc-950 rounded-[2rem] p-5 shadow-[0_20px_40px_rgba(34,211,238,0.2)] animate-in zoom-in-95 duration-300">
-                    <div className="flex items-center gap-4">
+                {receivedFiles.map((file) => (
+                  <div key={file.id} className="relative overflow-hidden bg-cyan-400 text-zinc-950 rounded-[2rem] p-5 shadow-[0_20px_40px_rgba(34,211,238,0.2)] animate-in zoom-in-95 duration-300">
+                    {/* Auto-delete Progress Bar Background */}
+                    <div 
+                        className="absolute bottom-0 left-0 h-1.5 bg-zinc-950/20 transition-all duration-1000 ease-linear"
+                        style={{ width: `${getProgressWidth(file.expiresAt)}%` }}
+                    />
+
+                    <div className="flex items-center gap-4 relative z-10">
                       <div className="w-12 h-12 bg-zinc-950/10 rounded-2xl flex items-center justify-center">
                         <FileIcon size={24} />
                       </div>
                       <div className="flex-grow min-w-0">
-                        <p className="text-[10px] font-mono uppercase font-black tracking-widest opacity-60">Packet Received</p>
+                        <div className="flex items-center gap-2 mb-0.5">
+                            <Clock size={10} className="text-zinc-900/60" />
+                            <p className="text-[10px] font-mono uppercase font-black tracking-widest opacity-60">
+                                Expires in {formatTimeLeft(file.expiresAt)}
+                            </p>
+                        </div>
                         <p className="font-bold truncate text-sm">{file.name}</p>
                       </div>
                       <button 
@@ -157,7 +210,7 @@ const HostView = ({ sessionId }) => {
               <div className="flex items-center justify-center gap-2 px-4 text-center">
                 <ShieldAlert size={12} className="text-zinc-600" />
                 <p className="text-[9px] text-zinc-600 font-mono uppercase tracking-widest leading-relaxed">
-                  Encryption Layer Active. Data resides in RAM only.
+                  Auto-wipe enabled (3m). Data resides in RAM only.
                 </p>
               </div>
             </div>
