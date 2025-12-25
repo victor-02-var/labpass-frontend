@@ -1,64 +1,75 @@
 import React, { useEffect, useState } from 'react';
 import { socket } from '../services/socket';
-import { UploadCloud, CheckCircle, Loader2, Wifi, Link, XCircle } from 'lucide-react'; // Added XCircle
+import { UploadCloud, CheckCircle, Loader2, Wifi, Link, LogOut } from 'lucide-react';
 
-const SenderView = ({ sessionId: initialSessionId }) => {
-  const [uploadStatus, setUploadStatus] = useState('idle');
-  // If you ALWAYS want to type the ID manually, remove "|| initialSessionId" below:
-  const [sessionId, setSessionId] = useState(initialSessionId || ''); 
-  const [isConnected, setIsConnected] = useState(false);
-  const [inputSessionId, setInputSessionId] = useState('');
-
-  useEffect(() => {
-    // 1. Connect the socket
-    socket.connect();
-
-    // 2. Define event handlers
-    const onConnect = () => {
-      // Only auto-join if we actually have a session ID set
-      if (sessionId) {
-        socket.emit("join-session", sessionId);
-      }
-    };
-
-    const onJoined = () => {
-      setIsConnected(true);
-    };
-
-    // 3. Attach listeners
-    socket.on("connect", onConnect);
-    socket.on("joined", onJoined);
-
-    // 4. Immediate join attempt if socket is already open (edge case fix)
-    if (socket.connected && sessionId) {
-       socket.emit("join-session", sessionId);
-    }
-
-    // 5. Cleanup function
-    return () => {
-      socket.off("connect", onConnect);
-      socket.off("joined", onJoined);
-      // We don't disconnect the socket here strictly if other components use it,
-      // but if this is the only user, socket.disconnect() is fine.
-      socket.disconnect(); 
-    };
-  }, [sessionId]); // Dependency array ensures this runs when sessionId changes
-
-  const handleConnect = () => {
-    const sid = inputSessionId.trim().toUpperCase();
-    if (!sid) return;
-    setSessionId(sid); // This triggers the useEffect to emit "join-session"
+const SenderView = () => {
+  // 1. Helper to get Session ID from URL (for QR scans)
+  const getSessionFromUrl = () => {
+    const params = new URLSearchParams(window.location.search);
+    const sessionParam = params.get('session');
+    return sessionParam ? sessionParam.toUpperCase() : '';
   };
 
-  // NEW: Handle manual disconnect to reset state
+  // 2. Initialize state
+  const [sessionId, setSessionId] = useState(getSessionFromUrl());
+  const [isConnected, setIsConnected] = useState(false);
+  
+  const [inputSessionId, setInputSessionId] = useState('');
+  const [uploadStatus, setUploadStatus] = useState('idle'); // idle, uploading, success
+
+  // 3. Connection Logic
+  useEffect(() => {
+    if (sessionId) {
+      if (!socket.connected) {
+        socket.connect();
+      }
+
+      const onConnect = () => {
+        socket.emit("join-session", sessionId);
+      };
+
+      const onJoined = () => {
+        setIsConnected(true);
+      };
+
+      socket.on("connect", onConnect);
+      socket.on("joined", onJoined);
+
+      if (socket.connected) {
+         socket.emit("join-session", sessionId);
+      }
+
+      return () => {
+        socket.off("connect", onConnect);
+        socket.off("joined", onJoined);
+      };
+    }
+  }, [sessionId]);
+
+  // 4. Handle Manual Connection
+  const handleManualConnect = () => {
+    const sid = inputSessionId.trim().toUpperCase();
+    if (!sid) {
+      alert("Please enter a valid Session ID");
+      return;
+    }
+    setSessionId(sid); 
+  };
+
+  // 5. Handle Disconnect (Reset everything)
   const handleDisconnect = () => {
     socket.disconnect();
     setSessionId('');
     setInputSessionId('');
     setIsConnected(false);
     setUploadStatus('idle');
+
+    // Clean the URL
+    const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+    window.history.pushState({path: newUrl}, '', newUrl);
   };
 
+  // 6. File Upload Logic
   const handleFileSelect = (e) => {
     const files = Array.from(e.target.files);
     if (files.length === 0) return;
@@ -95,6 +106,7 @@ const SenderView = ({ sessionId: initialSessionId }) => {
     });
   };
 
+  // --- RENDER: NOT CONNECTED (Input Screen) ---
   if (!isConnected) {
     return (
       <div className="text-center">
@@ -103,6 +115,7 @@ const SenderView = ({ sessionId: initialSessionId }) => {
             <Link size={20} className="text-cyan-500" />
             <p className="text-sm text-zinc-500 uppercase font-mono">Connect to Session</p>
           </div>
+          
           <input
             type="text"
             value={inputSessionId}
@@ -110,12 +123,14 @@ const SenderView = ({ sessionId: initialSessionId }) => {
             placeholder="Enter Session ID"
             className="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-200 font-mono text-center uppercase tracking-widest focus:border-cyan-500 focus:outline-none mb-4"
           />
+          
           <button
-            onClick={handleConnect}
+            onClick={handleManualConnect}
             className="w-full px-6 py-3 bg-cyan-500 text-zinc-950 font-bold rounded-lg hover:bg-cyan-400 transition-colors"
           >
             Connect
           </button>
+          
           <p className="text-xs text-zinc-600 mt-4">
             Scan the QR code on the receiving device or enter the Session ID manually.
           </p>
@@ -124,10 +139,11 @@ const SenderView = ({ sessionId: initialSessionId }) => {
     );
   }
 
+  // --- RENDER: CONNECTED (Upload Screen) ---
   return (
-    <div className="text-center">
+    <div className="text-center max-w-md mx-auto">
       {/* Connection Header */}
-      <div className="bg-zinc-900/80 border border-zinc-800 p-4 rounded-2xl backdrop-blur-md mb-6 flex items-center justify-between gap-3 max-w-md mx-auto">
+      <div className="bg-zinc-900/80 border border-zinc-800 p-4 rounded-2xl backdrop-blur-md mb-6 flex items-center justify-between gap-3">
         <div className="flex items-center gap-3">
             <div className="bg-emerald-500/20 p-2 rounded-full animate-pulse">
                 <Wifi size={20} className="text-emerald-400" />
@@ -137,19 +153,10 @@ const SenderView = ({ sessionId: initialSessionId }) => {
                 <p className="text-lg font-bold font-mono text-cyan-400 tracking-widest">{sessionId}</p>
             </div>
         </div>
-        
-        {/* NEW: Disconnect Button */}
-        <button 
-            onClick={handleDisconnect}
-            className="p-2 hover:bg-red-500/10 rounded-full group transition-colors"
-            title="Disconnect"
-        >
-            <XCircle size={24} className="text-zinc-600 group-hover:text-red-500 transition-colors" />
-        </button>
       </div>
 
       {/* Big Upload Button Area */}
-      <div className="relative group max-w-md mx-auto">
+      <div className="relative group mb-6">
         <div className={`absolute -inset-0.5 bg-gradient-to-r ${uploadStatus === 'success' ? 'from-emerald-500 to-green-600' : 'from-cyan-500 to-blue-600'} rounded-3xl blur opacity-30 group-hover:opacity-60 transition duration-500`}></div>
         
         <label className="relative block bg-zinc-900/90 border border-zinc-700/50 hover:border-cyan-500/50 p-12 rounded-3xl cursor-pointer transition-all overflow-hidden">
@@ -182,6 +189,19 @@ const SenderView = ({ sessionId: initialSessionId }) => {
           </div>
         </label>
       </div>
+
+      {/* Disconnect Button - Clearly Visible */}
+      <button 
+        onClick={handleDisconnect}
+        className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-400 font-bold rounded-xl transition-all duration-200"
+      >
+        <LogOut size={18} />
+        Disconnect Session
+      </button>
+      
+      <p className="text-xs text-zinc-600 mt-6 px-4">
+        Privacy Note: Files are streamed directly to the terminal browser and are not saved on cloud servers.
+      </p>
     </div>
   );
 };
