@@ -1,10 +1,11 @@
-
+// This line was missing! It tells React where to find the "io" function.
+import { io } from "socket.io-client";
 
 // Your new Render production URL
 const BACKEND_URL = "https://file-transfer-backend-wak9.onrender.com"; 
 
 export const socket = io(BACKEND_URL, {
-    autoConnect: false, // Remains false as you connect manually in components
+    autoConnect: false,
     
     // Forced WebSocket transport is more stable for Render & Cross-network
     transports: ["websocket"], 
