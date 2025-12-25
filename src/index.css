@@ -1,0 +1,35 @@
+@import "tailwindcss";
+
+/* If you need to use the 'zinc' palette or custom colors in v4, 
+   Tailwind usually includes them by default. 
+   But the error "unknown utility" happens if the engine 
+   isn't processing the file correctly. */
+
+@theme {
+  --color-zinc-950: #09090b;
+  --color-cyan-400: #22d3ee;
+  --color-cyan-500: #06b6d4;
+  
+  --animate-pulse-slow: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@layer base {
+  body {
+    @apply bg-zinc-950 text-zinc-100;
+    background-image: linear-gradient(rgba(0, 255, 255, 0.03) 1px, transparent 1px),
+                      linear-gradient(90deg, rgba(0, 255, 255, 0.03) 1px, transparent 1px);
+    background-size: 20px 20px, 20px 20px;
+  }
+}
+
+.text-glow-cyan {
+  text-shadow: 0 0 10px rgba(34, 211, 238, 0.5);
+}
+html {
+  scroll-behavior: smooth;
+}
+
+/* Optional: Add a subtle scroll padding so headers don't cover section titles */
+:target {
+  scroll-margin-top: 100px;
+}
