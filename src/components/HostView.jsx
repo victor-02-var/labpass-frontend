@@ -9,7 +9,7 @@ const HostView = ({ sessionId }) => {
 
   // IMPORTANT: Replace the string below with your deployed Frontend URL (e.g., Vercel/Netlify)
   // If testing locally across networks, use your PC's IP or an ngrok tunnel for the frontend.
-  const FRONTEND_URL = "https://your-frontend-app.vercel.app"; 
+  const FRONTEND_URL = "https://labpass-frontend.vercel.app"; 
   const shareUrl = `${FRONTEND_URL}?sid=${sessionId}`;
 
   useEffect(() => {
