@@ -1,116 +1,227 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence, useInView } from 'framer-motion';
 import { 
-  ArrowRight, Lock, Zap, Shield, Star, Terminal, User, Share2, 
-  ShieldCheck, Cpu, Globe, HardDrive, Users, Quote, ChevronLeft, ChevronRight 
+  ArrowRight, Lock, Zap, Shield, Star, Download, User, Share2, 
+  Settings, Cpu, Globe, HardDrive, Users, MessageSquare 
 } from 'lucide-react';
+import ComparisonChart from '../components/ComparisonChart'; // Adjust path as needed
 
 const testimonials = [
   {
     id: 1,
-    name: "Akshay ",
+    name: "Akshay",
     role: "CS Major",
     company: "Delhi University",
     content: "The labs here wipe data on reboot. LabPass is a lifesaver for getting code from my phone to the desktop instantly without leaving a trace.",
     rating: 5,
+    avatarColor: "bg-green-400"
   },
   {
     id: 2,
     name: "Pratik",
-    role: "Lab Administrator",
+    role: "Admin",
     company: "Cyber Security Dept",
     content: "I recommend this to all our students. It solves a huge security headache for us because it never touches the physical disk. Absolute zero footprint.",
     rating: 5,
+    avatarColor: "bg-purple-400"
   },
   {
     id: 3,
     name: "Sarah Jenkins",
-    role: "Design Student",
+    role: "Designer",
     company: "Creative Collective",
     content: "I have to transfer large image references. AirDrop gets wonky on university WiFi, but the P2P bridge here works every single time.",
     rating: 5,
+    avatarColor: "bg-pink-400"
   }
 ];
 
 const LandingPage = ({ onReceive, onSend }) => {
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-200 font-sans selection:bg-cyan-500/30 relative overflow-x-hidden">
+    <div className="min-h-screen bg-indigo-950 text-indigo-50 font-sans selection:bg-pink-500 selection:text-white relative overflow-x-hidden">
       
-      {/* --- BACKGROUND AMBIENCE --- */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#18181b_1px,transparent_1px),linear-gradient(to_bottom,#18181b_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_110%)] pointer-events-none -z-10" />
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[800px] bg-cyan-500/5 blur-[120px] rounded-full -z-10 animate-pulse" />
+      {/* --- BACKGROUND --- */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#4f46e5_2px,transparent_2px),linear-gradient(to_bottom,#4f46e5_2px,transparent_2px)] bg-[size:3rem_3rem] opacity-10 pointer-events-none -z-10" />
+      <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
+         <motion.div 
+            animate={{ y: [0, -20, 0], rotate: [0, 5, 0] }} 
+            transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute top-20 right-[-100px] w-96 h-96 bg-purple-600/30 rounded-full blur-3xl" 
+         />
+         <motion.div 
+            animate={{ y: [0, 30, 0], scale: [1, 1.1, 1] }} 
+            transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute bottom-0 left-[-100px] w-[500px] h-[500px] bg-pink-600/20 rounded-full blur-3xl" 
+         />
+      </div>
 
       {/* 1. HERO SECTION */}
-      <section className="relative pt-44 pb-32 px-6">
-        <div className="max-w-4xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-cyan-500/20 bg-cyan-500/5 text-cyan-400 text-[10px] md:text-xs font-mono mb-8 tracking-[0.2em] uppercase shadow-[0_0_20px_rgba(34,211,238,0.1)]">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-500"></span>
-            </span>
-            Encrypted P2P Uplink Active
-          </div>
+      <section className="relative pt-32 pb-24 px-6">
+        <div className="max-w-5xl mx-auto text-center relative z-10">
           
-          <h1 className="text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter mb-8 text-transparent bg-clip-text bg-gradient-to-b from-white via-zinc-200 to-zinc-500 leading-[0.9] pb-2">
-            Bridge files <br className="hidden md:block" /> without a trace.
+          {/* Badge */}
+          <motion.div 
+            initial={{ y: -50, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            className="inline-flex items-center gap-2 px-6 py-2 rounded-full border-4 border-black bg-yellow-400 text-black font-black text-sm uppercase tracking-wider shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] mb-8 transform -rotate-2"
+          >
+            <Zap className="fill-black" size={16} />
+            System Online: Ready to Transfer
+          </motion.div>
+          
+          {/* Main Title */}
+          <h1 className="text-5xl md:text-7xl lg:text-8xl font-black tracking-tight mb-8 text-white drop-shadow-[4px_4px_0px_rgba(0,0,0,1)] leading-[0.9]">
+            Transfer files <br className="hidden md:block" /> 
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-purple-400">instantly.</span>
           </h1>
           
-          <p className="text-zinc-400 text-lg md:text-xl max-w-2xl mx-auto mb-12 leading-relaxed font-light">
-            The zero-trust bridge for shared environments. Scan a QR, beam your data to RAM, and leave <span className="text-zinc-200 font-medium italic">zero digital footprint</span>.
+          <p className="text-indigo-200 text-lg md:text-xl max-w-2xl mx-auto mb-12 font-medium leading-relaxed bg-indigo-900/50 p-4 rounded-xl border-2 border-indigo-500/30 backdrop-blur-sm">
+            The <span className="text-yellow-400 font-bold">Zero-Hassle</span> bridge for your devices. Scan a QR, send your files, and leave <span className="text-pink-400 font-bold italic">zero digital footprint</span>.
           </p>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-5">
-            <button 
-              onClick={onSend}
-              className="group relative w-full sm:w-auto px-8 py-4 bg-white text-zinc-950 text-base font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-cyan-400 transition-all duration-300 active:scale-95 shadow-[0_0_40px_rgba(255,255,255,0.1)]"
-            >
-              Send File <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform"/>
-            </button>
-            <button 
-              onClick={onReceive}
-              className="group relative w-full sm:w-auto px-8 py-4 bg-zinc-900/40 border border-zinc-800 hover:border-zinc-700 text-base rounded-xl font-bold hover:bg-zinc-800/60 transition-all text-center backdrop-blur-sm text-zinc-300"
-            >
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
+            <ActionButton onClick={onSend} variant="primary" icon={<ArrowRight />}>
+              Send File
+            </ActionButton>
+            <ActionButton onClick={onReceive} variant="secondary" icon={<Download />}>
               Receive File
-            </button>
+            </ActionButton>
           </div>
         </div>
       </section>
 
       {/* 2. HOW IT WORKS */}
-      <section id="how-it-works" className="py-32 px-6 relative border-y border-zinc-900/50 bg-zinc-900/10">
+      <section id="how-it-works" className="py-24 px-6 relative bg-indigo-900/30 border-y-4 border-black">
         <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-24">
-             <h2 className="flex items-center justify-center gap-3 text-3xl md:text-4xl font-black tracking-tighter mb-4 text-white">
-                <Terminal className="text-cyan-500" /> INSTANT HANDSHAKE.
+          <div className="text-center mb-20">
+             <h2 className="text-3xl md:text-4xl font-black text-white uppercase tracking-wider drop-shadow-md flex items-center justify-center gap-3">
+               <Settings className="text-yellow-400 fill-yellow-400" size={40}/>
+               How It Works
              </h2>
-            <p className="text-lg text-zinc-500 max-w-xl mx-auto font-light">Engineered for speed, built for privacy. No accounts, no installs, no history.</p>
+             <p className="text-indigo-300 font-bold mt-4">Three simple steps. No installation required.</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 lg:gap-20 relative">
-            <Step icon={<Zap />} number="01" title="Generate Link" desc="Open LabPass on the target machine to create a unique, disposable P2P tunnel." />
-            <Step icon={<Share2 />} number="02" title="Secure Pairing" desc="Scan the generated QR code with your mobile device. Connection is direct and local." />
-            <Step icon={<ShieldCheck />} number="03" title="Volatile Transfer" desc="Data streams directly to RAM. Once the tab closes, the data is physically gone." />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12 relative">
+            {/* Connecting lines for desktop */}
+            <div className="hidden md:block absolute top-12 left-[16%] right-[16%] h-2 bg-indigo-950/50 rounded-full z-0" />
+            
+            <FeatureCard 
+              number="1" 
+              title="Create Room" 
+              desc="Open LabPass to create a secure, temporary connection tunnel." 
+              icon={<Zap className="text-white" />}
+              color="bg-pink-500"
+            />
+            <FeatureCard 
+              number="2" 
+              title="Connect Device" 
+              desc="Scan the QR code. The connection is direct and encrypted." 
+              icon={<Share2 className="text-white" />}
+              color="bg-purple-500"
+            />
+            <FeatureCard 
+              number="3" 
+              title="Instant Transfer" 
+              desc="Files move directly to RAM. Once you close the tab, data is wiped." 
+              icon={<Shield className="text-white" />}
+              color="bg-cyan-500"
+            />
           </div>
         </div>
       </section>
+
+     {/* --- NEW SECTION: COMPARISON CHART --- */}
+{/* CHANGE: bg-white -> bg-stone-100 */}
+<section className="py-24 px-6 bg-stone-100 border-y-4 border-black relative overflow-hidden">
+  
+  {/* Background Decorative Blob */}
+  <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-yellow-400 rounded-full blur-3xl opacity-10 -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+  
+  <div className="max-w-6xl mx-auto flex flex-col lg:flex-row items-center gap-16">
+      
+      {/* Left Text */}
+      <div className="lg:w-1/2 text-left">
+          <div className="inline-block bg-black text-white px-4 py-1 rounded-full font-bold text-xs uppercase tracking-widest mb-6 border-2 border-pink-500 shadow-[4px_4px_0px_0px_#ec4899]">
+              Performance Metrics
+          </div>
+          <h2 className="text-4xl md:text-6xl font-black text-black leading-[0.9] mb-6">
+              DOMINATE <br /> 
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-purple-600">THE OLD WAYS.</span>
+          </h2>
+          <p className="text-lg font-bold text-gray-600 mb-8 leading-relaxed">
+              Stop emailing yourself code snippets. Stop logging into Cloud drives on public computers. LabPass outperforms traditional methods in privacy, speed, and anonymity.
+          </p>
+          <div className="flex flex-col gap-4">
+              <div className="flex items-center gap-3 font-bold text-black">
+                  <div className="w-8 h-8 bg-green-400 border-2 border-black rounded-lg flex items-center justify-center shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">✓</div>
+                  100% RAM-Based (No Trace)
+              </div>
+              <div className="flex items-center gap-3 font-bold text-black">
+                  <div className="w-8 h-8 bg-green-400 border-2 border-black rounded-lg flex items-center justify-center shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">✓</div>
+                  Zero Account Friction
+              </div>
+          </div>
+      </div>
+
+      {/* Right Chart */}
+      <div className="lg:w-1/2 w-full">
+          <ComparisonChart />
+      </div>
+  </div>
+</section>
 
       {/* 3. SECURITY & ACTIVITY */}
       <SecuritySection />
       <ActivitySection />
 
-      {/* 4. NEW ANIMATED TESTIMONIALS */}
+      {/* 4. TESTIMONIALS */}
       <AnimatedReviews />
+
+      <footer className="py-12 bg-black text-center">
+        <p className="text-indigo-500 font-mono text-sm">SIMPLE. SECURE. VOLATILE.</p>
+      </footer>
 
     </div>
   );
 };
 
-// --- SUB-COMPONENTS ---
+// --- COMPONENTS ---
+
+const ActionButton = ({ children, onClick, variant, icon }) => {
+  const isPrimary = variant === 'primary';
+  return (
+    <button 
+      onClick={onClick}
+      className={`
+        relative group w-full sm:w-auto px-8 py-4 rounded-xl font-black text-lg flex items-center justify-center gap-3 transition-all duration-100 active:translate-y-2 active:shadow-none
+        border-4 border-black
+        ${isPrimary 
+          ? 'bg-pink-500 text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:bg-pink-400' 
+          : 'bg-white text-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:bg-gray-100'}
+      `}
+    >
+      {children} 
+      {icon && React.cloneElement(icon, { size: 20, className: "group-hover:scale-110 transition-transform" })}
+    </button>
+  );
+};
+
+const FeatureCard = ({ number, title, desc, icon, color }) => (
+  <div className="relative z-10 flex flex-col items-center text-center">
+    <div className={`w-24 h-24 ${color} border-4 border-black rounded-2xl flex items-center justify-center shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] mb-6 transform transition-transform hover:-translate-y-2 hover:rotate-3`}>
+      {React.cloneElement(icon, { size: 40 })}
+      <div className="absolute -top-4 -right-4 w-10 h-10 bg-yellow-400 border-4 border-black rounded-full flex items-center justify-center font-black text-black">
+        {number}
+      </div>
+    </div>
+    <h3 className="font-black text-2xl text-white mb-2">{title}</h3>
+    <p className="text-indigo-200 font-medium leading-relaxed max-w-[260px]">{desc}</p>
+  </div>
+);
 
 const AnimatedReviews = () => {
   const [activeIndex, setActiveIndex] = useState(0);
   const containerRef = useRef(null);
-  const isInView = useInView(containerRef, { once: true, amount: 0.2 });
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -120,92 +231,79 @@ const AnimatedReviews = () => {
   }, []);
 
   return (
-    <section ref={containerRef} id="reviews" className="py-32 px-6 relative overflow-hidden bg-zinc-950">
-      <div className="max-w-6xl mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+    <section ref={containerRef} className="py-32 px-6 bg-indigo-950 relative overflow-hidden">
+      <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+        
+        {/* Left: Heading */}
+        <div>
+          <div className="inline-block px-4 py-1 bg-cyan-500 border-2 border-black rounded-full text-black font-bold text-xs uppercase tracking-widest mb-6 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.5)]">
+            User Feedback
+          </div>
+          <h2 className="text-4xl md:text-6xl font-black text-white leading-none mb-6">
+            Trusted by <br /> 
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-500">Everyone.</span>
+          </h2>
+          <p className="text-indigo-300 text-lg font-medium max-w-md mb-8">
+            See why students, administrators, and designers rely on LabPass for their daily transfers.
+          </p>
           
-          {/* Left Side: Navigation & Title */}
-          <motion.div 
-            initial={{ opacity: 0, x: -20 }}
-            animate={isInView ? { opacity: 1, x: 0 } : {}}
-            transition={{ duration: 0.6 }}
-            className="flex flex-col justify-center space-y-8"
-          >
-            <div>
-              <div className="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-mono font-bold bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 uppercase tracking-widest mb-6">
-                <Star className="mr-2 h-3 w-3 fill-cyan-400" />
-                Trusted by Developers
-              </div>
-              <h2 className="text-4xl md:text-6xl font-black tracking-tighter text-white leading-tight">
-                Verified Field <br /> 
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500 italic">Reports.</span>
-              </h2>
-              <p className="mt-6 text-zinc-400 text-lg md:text-xl font-light leading-relaxed max-w-md">
-                Don't just take our word for it. See what engineers and lab admins say about our volatile bridge protocol.
-              </p>
-            </div>
+          {/* Navigation Dots */}
+          <div className="flex gap-3">
+            {testimonials.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => setActiveIndex(index)}
+                className={`h-4 border-2 border-black transition-all duration-300 ${
+                  activeIndex === index ? "w-12 bg-pink-500" : "w-4 bg-indigo-800"
+                } rounded-full`}
+              />
+            ))}
+          </div>
+        </div>
 
-            <div className="flex items-center gap-4">
-              <div className="flex gap-2">
-                {testimonials.map((_, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setActiveIndex(index)}
-                    className={`h-1 rounded-full transition-all duration-500 ${
-                      activeIndex === index ? "w-10 bg-cyan-500 shadow-[0_0_10px_#22d3ee]" : "w-4 bg-zinc-800"
-                    }`}
-                  />
-                ))}
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Right Side: Animated Card Stack */}
-          <div className="relative h-[400px] w-full group">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={activeIndex}
-                initial={{ opacity: 0, scale: 0.9, x: 30, rotate: 2 }}
-                animate={{ opacity: 1, scale: 1, x: 0, rotate: 0 }}
-                exit={{ opacity: 0, scale: 0.95, x: -30, rotate: -2 }}
-                transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
-                className="absolute inset-0"
-              >
-                <div className="h-full bg-zinc-900/40 backdrop-blur-xl border border-zinc-800/50 rounded-[2.5rem] p-10 flex flex-col justify-between shadow-2xl relative overflow-hidden">
-                  {/* Glass Background Pattern */}
-                  <div className="absolute top-0 right-0 p-8 text-cyan-500/10 -rotate-12">
-                    <Quote size={120} />
+        {/* Right: Dialogue Box */}
+        <div className="relative h-[400px] w-full">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeIndex}
+              initial={{ opacity: 0, y: 50, scale: 0.9 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -50, scale: 0.9 }}
+              transition={{ type: "spring", stiffness: 200, damping: 20 }}
+              className="absolute inset-0"
+            >
+              <div className="h-full bg-white border-4 border-black rounded-3xl p-8 flex flex-col justify-between shadow-[12px_12px_0px_0px_#000]">
+                
+                {/* Dialogue Content */}
+                <div className="relative z-10">
+                  <div className="flex gap-1 mb-4">
+                    {[...Array(testimonials[activeIndex].rating)].map((_, i) => (
+                      <Star key={i} size={24} className="fill-yellow-400 text-black stroke-[3]" />
+                    ))}
                   </div>
-
-                  <div className="space-y-6 relative z-10">
-                    <div className="flex gap-1">
-                      {[...Array(testimonials[activeIndex].rating)].map((_, i) => (
-                        <Star key={i} size={16} className="fill-cyan-500 text-cyan-500" />
-                      ))}
-                    </div>
-                    <p className="text-xl md:text-2xl font-medium leading-relaxed text-zinc-200 italic">
+                  <div className="relative">
+                    <MessageSquare size={40} className="text-indigo-100 absolute -top-2 -left-2 -z-10 transform -scale-x-100" />
+                    <p className="text-xl md:text-2xl font-bold text-black leading-snug">
                       "{testimonials[activeIndex].content}"
                     </p>
                   </div>
+                </div>
 
-                  <div className="flex items-center gap-4 relative z-10 border-t border-zinc-800/50 pt-8">
-                    <div className="h-14 w-14 rounded-2xl bg-zinc-800 border border-zinc-700 flex items-center justify-center text-zinc-500 shadow-inner">
-                      <User size={30} />
-                    </div>
-                    <div>
-                      <h3 className="font-bold text-white text-lg tracking-tight">{testimonials[activeIndex].name}</h3>
-                      <p className="text-sm font-mono text-cyan-500/60 uppercase tracking-widest">
-                        {testimonials[activeIndex].role}, {testimonials[activeIndex].company}
-                      </p>
-                    </div>
+                {/* User Profile */}
+                <div className="flex items-center gap-4 border-t-4 border-gray-100 pt-6 mt-4">
+                  <div className={`h-16 w-16 ${testimonials[activeIndex].avatarColor} border-4 border-black rounded-xl flex items-center justify-center text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,0.2)]`}>
+                    <User size={32} strokeWidth={2.5} />
+                  </div>
+                  <div>
+                    <h3 className="font-black text-black text-xl uppercase">{testimonials[activeIndex].name}</h3>
+                    <p className="text-sm font-bold text-indigo-500 bg-indigo-100 px-2 py-0.5 rounded inline-block">
+                       {testimonials[activeIndex].role}
+                    </p>
                   </div>
                 </div>
-              </motion.div>
-            </AnimatePresence>
-            
-            {/* Decorative Card Shadows */}
-            <div className="absolute -inset-4 bg-cyan-500/5 blur-3xl rounded-full -z-10 opacity-50" />
-          </div>
+              </div>
+            </motion.div>
+          </AnimatePresence>
         </div>
       </div>
     </section>
@@ -213,73 +311,75 @@ const AnimatedReviews = () => {
 };
 
 const ActivitySection = () => (
-  <section className="py-20 md:py-24 px-6 border-y border-zinc-900/50 bg-zinc-950 relative overflow-hidden">
-    <div className="max-w-6xl mx-auto relative z-10">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
-        <ActivityCard 
-          icon={<Globe className="text-cyan-500" size={20} />} 
-          label="Computers Connected" 
+  <section className="py-20 px-6 bg-indigo-950 border-t-4 border-black relative">
+    <div className="max-w-6xl mx-auto">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <StatCard 
+          icon={<Globe className="text-white" size={24} />} 
+          label="Active Sessions" 
           value="42,081" 
-          detail="Active connections right now" 
+          color="bg-purple-500"
         />
-        <ActivityCard 
-          icon={<HardDrive className="text-emerald-500" size={20} />} 
-          label="Total Files Sent" 
+        <StatCard 
+          icon={<HardDrive className="text-white" size={24} />} 
+          label="Data Transferred" 
           value="1.42 TB" 
-          detail="Safe transfers through RAM" 
+          color="bg-pink-500"
         />
-        <ActivityCard 
-          icon={<Users className="text-amber-500" size={20} />} 
+        <StatCard 
+          icon={<Users className="text-white" size={24} />} 
           label="Happy Users" 
           value="12.8k+" 
-          detail="People using LabPass daily" 
+          color="bg-cyan-500"
         />
       </div>
     </div>
   </section>
 );
 
-const ActivityCard = ({ icon, label, value, detail }) => (
-  <div className="p-6 md:p-8 bg-zinc-900/20 border border-zinc-800/50 rounded-2xl md:rounded-3xl backdrop-blur-sm group hover:border-cyan-500/30 transition-all duration-500">
-    <div className="flex items-center gap-3 mb-4 md:mb-6">
-      <div className="w-10 h-10 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center group-hover:bg-zinc-800 transition-colors">
+const StatCard = ({ icon, label, value, color }) => (
+  <div className="relative group">
+    <div className="absolute inset-0 bg-black rounded-2xl translate-x-2 translate-y-2" />
+    <div className="relative p-6 bg-indigo-900 border-4 border-black rounded-2xl flex flex-col items-center text-center hover:-translate-y-1 hover:translate-x-1 transition-transform bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]">
+      <div className={`w-12 h-12 ${color} border-4 border-black rounded-lg flex items-center justify-center mb-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.3)]`}>
         {icon}
       </div>
-      <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">{label}</span>
-    </div>
-    <div className="space-y-1">
-      <h4 className="text-3xl md:text-4xl font-black text-white tracking-tighter">{value}</h4>
-      <p className="text-[11px] md:text-xs text-zinc-600 font-light italic">{detail}</p>
+      <h4 className="text-4xl font-black text-white mb-1">{value}</h4>
+      <p className="text-sm font-bold text-indigo-300 uppercase tracking-widest">{label}</p>
     </div>
   </div>
 );
 
 const SecuritySection = () => (
-  <section id="protocol" className="py-32 px-6 bg-zinc-950">
+  <section id="protocol" className="py-32 px-6 bg-yellow-400 border-y-4 border-black text-black pattern-dots pattern-black pattern-bg-transparent pattern-size-4 pattern-opacity-10">
     <div className="max-w-6xl mx-auto">
       <div className="flex flex-col lg:flex-row gap-20 items-center">
         <div className="lg:w-1/2">
-          <h2 className="text-xs font-mono text-cyan-500 uppercase tracking-[0.4em] mb-6">Security Infrastructure</h2>
-          <h3 className="text-4xl md:text-5xl font-black text-white mb-8 tracking-tighter leading-[1.1]">Built for the <br/>volatile web.</h3>
-          <p className="text-zinc-400 text-lg leading-relaxed mb-10 font-light">
-            We don't just encrypt data. We ensure it never exists in a permanent state. LabPass is architected to be 
-            <span className="text-zinc-200 font-medium"> invisible to forensics</span>.
+          <div className="inline-block bg-black text-white font-bold px-3 py-1 text-xs mb-4 uppercase tracking-widest transform -rotate-1">
+            Security Protocol
+          </div>
+          <h3 className="text-5xl md:text-6xl font-black mb-8 leading-[0.9]">
+            BUILT FOR THE <br/>
+            <span className="text-white text-stroke-2 text-stroke-black drop-shadow-[4px_4px_0px_black]">VOLATILE WEB.</span>
+          </h3>
+          <p className="text-black/80 text-xl leading-relaxed mb-10 font-bold max-w-md">
+            We don't just encrypt data. We ensure it never exists in a permanent state. Invisible to forensics.
           </p>
-          <div className="space-y-8">
-            <SecurityFeature icon={<Cpu size={18}/>} title="End-to-End Signaling" desc="Handshakes are encrypted and session-specific, using WebRTC for peer-to-peer data channels." />
-            <SecurityFeature icon={<Lock size={18}/>} title="No-Log Architecture" desc="Our signaling servers never touch your file contents or metadata. We don't even have a database." />
-            <SecurityFeature icon={<Shield size={18}/>} title="Browser Sandboxing" desc="Files stay within the browser's volatile memory (RAM) and are purged the moment the session ends." />
+          <div className="space-y-6">
+            <SecurityItem icon={<Cpu />} title="End-to-End Signaling" />
+            <SecurityItem icon={<Lock />} title="No-Log Architecture" />
+            <SecurityItem icon={<Shield />} title="Browser Sandboxing" />
           </div>
         </div>
 
-        <div className="lg:w-1/2 grid grid-cols-2 gap-4 w-full">
-          <div className="space-y-4 mt-12">
-            <StatCard value="0" label="Databases used" color="text-cyan-500" />
-            <StatCard value="100%" label="RAM Based" color="text-emerald-500" />
+        <div className="lg:w-1/2 grid grid-cols-2 gap-6 w-full">
+          <div className="space-y-6 mt-12">
+            <StatBox value="0" label="Databases" color="bg-white" />
+            <StatBox value="100%" label="RAM Based" color="bg-purple-500 text-white" />
           </div>
-          <div className="space-y-4">
-            <StatCard value="5m" label="Auto-Erase" color="text-white" />
-            <StatCard value="P2P" label="Direct Link" color="text-amber-500" />
+          <div className="space-y-6">
+            <StatBox value="5m" label="Auto-Erase" color="bg-black text-white" />
+            <StatBox value="P2P" label="Direct Link" color="bg-pink-500 text-white" />
           </div>
         </div>
       </div>
@@ -287,33 +387,19 @@ const SecuritySection = () => (
   </section>
 );
 
-const StatCard = ({ value, label, color }) => (
-  <div className="p-10 bg-zinc-900/30 border border-zinc-800/50 rounded-[2rem] text-center backdrop-blur-xl group hover:border-zinc-700 transition-colors">
-    <p className={`text-4xl md:text-5xl font-black mb-2 ${color} tracking-tighter`}>{value}</p>
-    <p className="text-[10px] uppercase font-mono text-zinc-500 tracking-[0.2em]">{label}</p>
+const StatBox = ({ value, label, color }) => (
+  <div className={`${color} p-8 border-4 border-black rounded-3xl shadow-[8px_8px_0px_0px_rgba(0,0,0,0.2)] text-center transform transition hover:scale-105`}>
+    <p className="text-5xl font-black mb-2 tracking-tighter">{value}</p>
+    <p className="text-xs uppercase font-bold tracking-widest opacity-80">{label}</p>
   </div>
 );
 
-const SecurityFeature = ({ title, desc, icon }) => (
-  <div className="flex gap-5 group">
-    <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center text-cyan-500 group-hover:border-cyan-500/50 transition-colors shadow-xl">
-      {icon}
+const SecurityItem = ({ title, icon }) => (
+  <div className="flex items-center gap-4 p-4 bg-white/50 border-4 border-black/10 rounded-xl hover:bg-white hover:border-black transition-colors cursor-default">
+    <div className="bg-black text-white p-2 rounded-lg">
+      {React.cloneElement(icon, { size: 20 })}
     </div>
-    <div>
-      <p className="text-white font-bold text-lg tracking-tight mb-1">{title}</p>
-      <p className="text-zinc-500 text-sm leading-relaxed font-light">{desc}</p>
-    </div>
-  </div>
-);
-
-const Step = ({ icon, title, desc, number }) => (
-  <div className="relative flex flex-col items-center text-center group">
-    <span className="absolute -top-10 text-7xl font-black text-zinc-900/40 select-none group-hover:text-cyan-500/5 transition-colors">{number}</span>
-    <div className="w-20 h-20 bg-zinc-900 border border-zinc-800 group-hover:border-cyan-500/50 rounded-[2rem] flex items-center justify-center mb-8 text-cyan-400 shadow-2xl transition-all duration-500 group-hover:-translate-y-2 group-hover:shadow-[0_20px_40px_rgba(0,0,0,0.4)] relative z-10">
-      {React.cloneElement(icon, { size: 32 })}
-    </div>
-    <h3 className="font-bold mb-4 text-white text-2xl tracking-tighter">{title}</h3>
-    <p className="text-zinc-500 text-base leading-relaxed max-w-[280px] font-light">{desc}</p>
+    <p className="font-black text-lg">{title}</p>
   </div>
 );
 
