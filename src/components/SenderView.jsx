@@ -7,7 +7,7 @@ const SenderView = () => {
   // 1. Helper to get Session ID from URL (for QR scans)
   const getSessionFromUrl = () => {
     const params = new URLSearchParams(window.location.search);
-    const sessionParam = params.get('session');
+    const sessionParam = params.get('sid');
     return sessionParam ? sessionParam.toUpperCase() : '';
   };
 
