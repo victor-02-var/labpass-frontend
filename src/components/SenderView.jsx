@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { socket } from '../services/socket';
-import { UploadCloud, CheckCircle, Loader2, Wifi, Link, LogOut, Zap, ArrowRight } from 'lucide-react';
+import { UploadCloud, CheckCircle, Loader2, Wifi, Link, LogOut, Zap, ArrowRight, XCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const SenderView = () => {
@@ -11,17 +11,20 @@ const SenderView = () => {
     return sessionParam ? sessionParam.toUpperCase() : '';
   };
 
-  // 2. Initialize state
   const urlSessionId = getSessionFromUrl();
   const [sessionId, setSessionId] = useState(urlSessionId);
   const [inputSessionId, setInputSessionId] = useState('');
   
-  // Status: 'idle' (waiting for input), 'connecting' (handshaking), 'connected' (ready)
-  // If URL has ID, start as 'connecting' immediately
+  // Status: 'idle' | 'connecting' | 'connected' | 'error'
+  // If URL has ID, start 'connecting' immediately
   const [connectionStatus, setConnectionStatus] = useState(urlSessionId ? 'connecting' : 'idle');
+  const [errorMessage, setErrorMessage] = useState('');
   const [uploadStatus, setUploadStatus] = useState('idle');
 
-  // 3. Connection Logic
+  // Ref to clear timeouts to prevent memory leaks
+  const timeoutRef = useRef(null);
+
+  // 2. Connection Logic
   useEffect(() => {
     // Only attempt connection if we have an ID and we are in the 'connecting' state
     if (sessionId && connectionStatus === 'connecting') {
@@ -30,66 +33,84 @@ const SenderView = () => {
         socket.connect();
       }
 
+      // --- EVENT HANDLERS ---
+      
       const handleJoin = () => {
-        socket.emit("join-session", sessionId);
+        // Emit the strict join request for Senders
+        socket.emit("join-session-sender", sessionId);
       };
 
       const onJoined = () => {
-        // Add a small artificial delay so the user sees the "Success" animation briefly
-        setTimeout(() => {
+        // SUCCESS: Server confirmed we are in the room
+        if (timeoutRef.current) clearTimeout(timeoutRef.current);
+        
+        // Artificial delay so user sees the loading animation briefly
+        timeoutRef.current = setTimeout(() => {
             setConnectionStatus('connected');
         }, 800);
       };
 
-      const onConnectError = () => {
-        alert("Connection Failed. Check your network or Session ID.");
-        setConnectionStatus('idle');
-        setSessionId('');
+      const onError = (msg) => {
+        // FAILURE: Server says room doesn't exist
+        if (timeoutRef.current) clearTimeout(timeoutRef.current);
+        setErrorMessage(typeof msg === 'string' ? msg : "Session Invalid or Expired");
+        setConnectionStatus('error');
       };
 
-      // Listeners
+      // --- LISTENERS ---
       socket.on("connect", handleJoin);
       socket.on("joined", onJoined);
-      socket.on("connect_error", onConnectError);
+      
+      // Listen for specific errors from backend
+      socket.on("invalid-session", onError); 
+      socket.on("connect_error", () => onError("Network Error: Could not reach server"));
 
-      // If already connected, trigger join immediately
+      // Trigger immediately if socket is already open
       if (socket.connected) {
          handleJoin();
       }
 
+      // Cleanup
       return () => {
         socket.off("connect", handleJoin);
         socket.off("joined", onJoined);
-        socket.off("connect_error", onConnectError);
+        socket.off("invalid-session", onError);
+        socket.off("connect_error");
+        if (timeoutRef.current) clearTimeout(timeoutRef.current);
       };
     }
   }, [sessionId, connectionStatus]);
 
-  // 4. Handle Manual Connection (Button Click)
+  // 3. Handlers
   const handleManualConnect = () => {
     const sid = inputSessionId.trim().toUpperCase();
-    if (!sid) {
+    if (sid.length < 4) {
       alert("Please enter a valid Session ID");
       return;
     }
     setSessionId(sid); 
+    setErrorMessage('');
     setConnectionStatus('connecting');
   };
 
-  // 5. Handle Disconnect (Reset everything)
   const handleDisconnect = () => {
     socket.disconnect();
     setSessionId('');
     setInputSessionId('');
     setConnectionStatus('idle');
     setUploadStatus('idle');
-
-    // Clean the URL so refreshing doesn't auto-connect again
+    setErrorMessage('');
     const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
     window.history.pushState({path: newUrl}, '', newUrl);
   };
 
-  // 6. File Upload Logic
+  const handleRetry = () => {
+    setConnectionStatus('idle');
+    setErrorMessage('');
+    setSessionId('');
+    setInputSessionId('');
+  };
+
   const handleFileSelect = (e) => {
     const files = Array.from(e.target.files);
     if (files.length === 0) return;
@@ -97,9 +118,7 @@ const SenderView = () => {
       alert('Please select up to 7 files at a time.');
       return;
     }
-
     setUploadStatus('uploading');
-
     let completed = 0;
     const total = files.length;
 
@@ -107,13 +126,7 @@ const SenderView = () => {
       const reader = new FileReader();
       reader.onload = (loadEvent) => {
         const base64Data = loadEvent.target.result;
-        
-        socket.emit("send-file", {
-          sessionId,
-          name: file.name,
-          data: base64Data
-        });
-
+        socket.emit("send-file", { sessionId, name: file.name, data: base64Data });
         completed++;
         if (completed === total) {
           setTimeout(() => {
@@ -126,26 +139,23 @@ const SenderView = () => {
     });
   };
 
-  // --- VIEW 1: LOADING / CONNECTING ---
+  // --- VIEW 1: LOADING (CONNECTING) ---
   if (connectionStatus === 'connecting') {
      return (
         <div className="min-h-screen bg-indigo-950 flex items-center justify-center p-4 relative overflow-hidden">
             <div className="absolute inset-0 bg-[linear-gradient(to_right,#4f46e5_2px,transparent_2px),linear-gradient(to_bottom,#4f46e5_2px,transparent_2px)] bg-[size:3rem_3rem] opacity-10 pointer-events-none" />
             
             <div className="w-full max-w-sm relative z-10 animate-in fade-in zoom-in-95 duration-500">
-                {/* Shadow Block */}
                 <div className="absolute inset-0 bg-black rounded-[2rem] translate-x-3 translate-y-3" />
                 
                 <div className="relative bg-white border-4 border-black rounded-[2rem] p-10 flex flex-col items-center text-center">
                     <div className="relative mb-8">
-                        {/* Ping Animation */}
                         <div className="absolute inset-0 bg-yellow-400 rounded-full animate-ping opacity-75"></div>
                         <div className="relative w-20 h-20 bg-yellow-400 border-4 border-black rounded-full flex items-center justify-center">
                             <Loader2 size={40} className="text-black animate-spin" strokeWidth={2.5} />
                         </div>
                     </div>
-                    
-                    <h2 className="text-2xl font-black text-black uppercase mb-2">Establishing Uplink</h2>
+                    <h2 className="text-2xl font-black text-black uppercase mb-2">Verifying Uplink</h2>
                     <p className="text-gray-500 font-bold font-mono">Target: {sessionId}</p>
                     
                     <div className="mt-8 w-full bg-gray-100 h-2 rounded-full overflow-hidden border-2 border-black">
@@ -157,7 +167,33 @@ const SenderView = () => {
      );
   }
 
-  // --- VIEW 2: MANUAL INPUT ---
+  // --- VIEW 2: ERROR STATE ---
+  if (connectionStatus === 'error') {
+    return (
+       <div className="min-h-screen bg-indigo-950 flex items-center justify-center p-4 relative overflow-hidden">
+           <div className="absolute inset-0 bg-[linear-gradient(to_right,#4f46e5_2px,transparent_2px),linear-gradient(to_bottom,#4f46e5_2px,transparent_2px)] bg-[size:3rem_3rem] opacity-10 pointer-events-none" />
+           
+           <div className="w-full max-w-sm relative z-10 animate-in fade-in zoom-in-95 duration-500">
+               <div className="absolute inset-0 bg-black rounded-[2rem] translate-x-3 translate-y-3" />
+               
+               <div className="relative bg-white border-4 border-black rounded-[2rem] p-8 flex flex-col items-center text-center">
+                   <div className="w-20 h-20 bg-red-500 text-white border-4 border-black rounded-full flex items-center justify-center mb-6 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+                       <XCircle size={40} strokeWidth={2.5} />
+                   </div>
+                   
+                   <h2 className="text-2xl font-black text-black uppercase mb-2">Connection Failed</h2>
+                   <p className="text-gray-500 font-bold mb-8 px-4">{errorMessage}</p>
+                   
+                   <button onClick={handleRetry} className="w-full py-3 bg-black text-white font-black uppercase tracking-widest rounded-xl hover:bg-gray-800 transition-all shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-1 hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+                       Try Again
+                   </button>
+               </div>
+           </div>
+       </div>
+    );
+ }
+
+  // --- VIEW 3: MANUAL INPUT ---
   if (connectionStatus === 'idle') {
     return (
       <div className="min-h-screen bg-indigo-950 font-sans selection:bg-pink-500 selection:text-white flex items-center justify-center p-4">
@@ -199,7 +235,7 @@ const SenderView = () => {
     );
   }
 
-  // --- VIEW 3: UPLOAD SCREEN (Connected) ---
+  // --- VIEW 4: UPLOAD SCREEN (CONNECTED) ---
   return (
     <div className="min-h-screen bg-indigo-950 font-sans selection:bg-pink-500 selection:text-white flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#4f46e5_2px,transparent_2px),linear-gradient(to_bottom,#4f46e5_2px,transparent_2px)] bg-[size:3rem_3rem] opacity-10 pointer-events-none" />
@@ -210,7 +246,6 @@ const SenderView = () => {
 
         <div className="relative bg-indigo-100 border-4 border-black rounded-[2.5rem] overflow-hidden flex flex-col">
           
-          {/* Header */}
           <div className="bg-yellow-400 border-b-4 border-black p-6 flex items-center justify-between">
              <div className="flex items-center gap-3">
                <div className="relative">
@@ -230,8 +265,6 @@ const SenderView = () => {
           </div>
 
           <div className="p-8">
-            
-            {/* Big Upload Area */}
             <div className="relative group mb-8">
               <label className={`
                  relative block w-full aspect-square rounded-3xl border-4 border-black border-dashed cursor-pointer overflow-hidden transition-all duration-300
@@ -272,7 +305,6 @@ const SenderView = () => {
               </label>
             </div>
 
-            {/* Disconnect Button */}
             <button 
               onClick={handleDisconnect}
               className="w-full py-4 bg-white border-4 border-black rounded-xl font-black uppercase tracking-widest text-red-500 hover:bg-red-50 hover:text-red-600 active:translate-y-1 transition-all flex items-center justify-center gap-2 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none"
