@@ -130,14 +130,14 @@ function App() {
               <div className="flex items-center gap-8 text-sm font-black uppercase tracking-widest text-indigo-200">
                 <a href="#how-it-works" className="hover:text-pink-500 transition-colors hover:-translate-y-0.5 inline-block">How It Works</a>
                 <a href="#protocol" className="hover:text-pink-500 transition-colors hover:-translate-y-0.5 inline-block">Security</a>
-                <button onClick={() => setCurrentView('about')} className="hover:text-pink-500 transition-colors hover:-translate-y-0.5 inline-block">About</button>
+                <button onClick={() => setCurrentView('about')} className="hover:text-pink-500 transition-colors hover:-translate-y-0.5 inline-block">ABOUT</button>
               </div>
             ) : (
-              <div className={`flex items-center gap-6 px-6 py-2 rounded-xl border border-white/10 bg-black/20 backdrop-blur-sm`}>
-                <MetadataItem label="SESSION" value={sessionId} icon={<Terminal size={14}/>} dark={false} />
-                <div className="w-0.5 h-6 bg-white/10"></div>
-                <MetadataItem label="TIME" value={time.toLocaleTimeString([], { hour12: false })} icon={<Clock size={14}/>} dark={false} />
-              </div>
+             <div className="flex items-center justify-center px-6 py-2 rounded-xl border border-white/10 bg-black/20 backdrop-blur-sm">
+  <p className="text-xs font-black text-indigo-100 uppercase tracking-widest whitespace-nowrap">
+    Zero-Friction Data Transfer with End-to-End Encryption
+  </p>
+</div>
             )}
           </div>
 

@@ -4,12 +4,12 @@ import { Zap } from "lucide-react";
 
 // 1. Data tailored to your niche
 const chartData = [
-  { metric: "Transfer Speed", labpass: 100, traditional: 45 },
+  { metric: "Transfer Speed", labpass: 60, traditional: 45 },
   { metric: "User Privacy", labpass: 100, traditional: 30 },
-  { metric: "Security", labpass: 95, traditional: 60 },
+  { metric: "Security", labpass: 80, traditional: 60 },
   { metric: "No Login Req.", labpass: 100, traditional: 10 },
   { metric: "File Capacity", labpass: 90, traditional: 50 },
-  { metric: "Anonymity", labpass: 100, traditional: 25 },
+  { metric: "Anonymity", labpass: 70, traditional: 25 },
 ];
 
 const chartConfig = {
