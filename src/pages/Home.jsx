@@ -5,7 +5,7 @@ import {
   Settings, Cpu, Globe, HardDrive, Users, MessageSquare 
 } from 'lucide-react';
 import ComparisonChart from '../components/ComparisonChart'; // Adjust path as needed
-import Marquee from '../components/Marquee';
+
 import UseCases from '../components/UseCases';
 import FAQ from '../components/FAQ';
 const testimonials = [
@@ -182,7 +182,6 @@ const LandingPage = ({ onReceive, onSend }) => {
       <AnimatedReviews />
 
      
-         <Marquee />
       
 
     </div>
