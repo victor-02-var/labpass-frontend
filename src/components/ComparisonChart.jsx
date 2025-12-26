@@ -47,8 +47,8 @@ const CustomTooltip = ({ active, payload, label }) => {
 
 export default function ComparisonChart() {
   return (
-    // CHANGE: Changed bg-white to bg-stone-50 (Off-White)
-    <div className="border-4 border-black rounded-[2.5rem] shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] bg-stone-50 overflow-hidden w-full max-w-md mx-auto">
+    // CHANGE: Changed bg-stone-50 to bg-white to pop against the #F4F3EE section background
+    <div className="border-4 border-black rounded-[2.5rem] shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] bg-white overflow-hidden w-full max-w-md mx-auto">
       
       {/* --- Card Header --- */}
       <div className="p-6 border-b-4 border-black bg-yellow-400 flex flex-col gap-1">
@@ -62,8 +62,8 @@ export default function ComparisonChart() {
       </div>
       
       {/* --- Card Content --- */}
-      {/* CHANGE: Inner background is now white to contrast with the stone card */}
-      <div className="p-4 pt-8 bg-white/50">
+      {/* CHANGE: Added a subtle Indigo tint to the chart area to separate it from the white card body */}
+      <div className="p-4 pt-8 bg-indigo-50/50">
         <div className="h-[300px] w-full">
           <ResponsiveContainer width="100%" height="100%">
             <RadarChart cx="50%" cy="50%" outerRadius="80%" data={chartData}>
