@@ -5,7 +5,9 @@ import {
   Settings, Cpu, Globe, HardDrive, Users, MessageSquare 
 } from 'lucide-react';
 import ComparisonChart from '../components/ComparisonChart'; // Adjust path as needed
-
+import Marquee from '../components/Marquee';
+import UseCases from '../components/UseCases';
+import FAQ from '../components/FAQ';
 const testimonials = [
   {
     id: 1,
@@ -89,6 +91,7 @@ const LandingPage = ({ onReceive, onSend }) => {
           </div>
         </div>
       </section>
+     
 
       {/* 2. HOW IT WORKS */}
       <section id="how-it-works" className="py-24 px-6 relative bg-indigo-900/30 border-y-4 border-black">
@@ -132,6 +135,7 @@ const LandingPage = ({ onReceive, onSend }) => {
 
      {/* --- NEW SECTION: COMPARISON CHART --- */}
 {/* CHANGE: bg-white -> bg-stone-100 */}
+<UseCases />
 <section className="py-24 px-6 bg-stone-100 border-y-4 border-black relative overflow-hidden">
   
   {/* Background Decorative Blob */}
@@ -173,13 +177,13 @@ const LandingPage = ({ onReceive, onSend }) => {
       {/* 3. SECURITY & ACTIVITY */}
       <SecuritySection />
       <ActivitySection />
-
+<FAQ />
       {/* 4. TESTIMONIALS */}
       <AnimatedReviews />
 
-      <footer className="py-12 bg-black text-center">
-        <p className="text-indigo-500 font-mono text-sm">SIMPLE. SECURE. VOLATILE.</p>
-      </footer>
+     
+         <Marquee />
+      
 
     </div>
   );
@@ -306,7 +310,9 @@ const AnimatedReviews = () => {
           </AnimatePresence>
         </div>
       </div>
+       
     </section>
+    
   );
 };
 
