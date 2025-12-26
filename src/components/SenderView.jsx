@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { socket } from '../services/socket';
-import { UploadCloud, CheckCircle, Loader2, Wifi, Link, LogOut } from 'lucide-react';
+import { UploadCloud, CheckCircle, Loader2, Wifi, Link, LogOut, Send } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 const SenderView = () => {
   // 1. Helper to get Session ID from URL (for QR scans)
@@ -109,31 +110,42 @@ const SenderView = () => {
   // --- RENDER: NOT CONNECTED (Input Screen) ---
   if (!isConnected) {
     return (
-      <div className="text-center">
-        <div className="bg-zinc-900/80 border border-zinc-800 p-6 rounded-2xl backdrop-blur-md mb-6 max-w-md mx-auto">
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <Link size={20} className="text-cyan-500" />
-            <p className="text-sm text-zinc-500 uppercase font-mono">Connect to Session</p>
-          </div>
-          
-          <input
-            type="text"
-            value={inputSessionId}
-            onChange={(e) => setInputSessionId(e.target.value.toUpperCase())}
-            placeholder="Enter Session ID"
-            className="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-200 font-mono text-center uppercase tracking-widest focus:border-cyan-500 focus:outline-none mb-4"
-          />
-          
-          <button
-            onClick={handleManualConnect}
-            className="w-full px-6 py-3 bg-cyan-500 text-zinc-950 font-bold rounded-lg hover:bg-cyan-400 transition-colors"
-          >
-            Connect
-          </button>
-          
-          <p className="text-xs text-zinc-600 mt-4">
-            Scan the QR code on the receiving device or enter the Session ID manually.
-          </p>
+      <div className="min-h-screen bg-indigo-950 font-sans selection:bg-pink-500 selection:text-white flex items-center justify-center p-4">
+        {/* Background Pattern */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#4f46e5_2px,transparent_2px),linear-gradient(to_bottom,#4f46e5_2px,transparent_2px)] bg-[size:3rem_3rem] opacity-10 pointer-events-none" />
+
+        <div className="w-full max-w-md relative z-10 animate-in fade-in zoom-in-95 duration-500">
+           {/* Shadow Block */}
+           <div className="absolute inset-0 bg-black rounded-[2rem] translate-x-3 translate-y-3" />
+           
+           <div className="relative bg-white border-4 border-black rounded-[2rem] overflow-hidden p-8 flex flex-col items-center text-center">
+             
+             <div className="w-16 h-16 bg-yellow-400 border-4 border-black rounded-full flex items-center justify-center mb-6 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+               <Link size={32} className="text-black" />
+             </div>
+
+             <h2 className="text-3xl font-black text-black mb-2 uppercase tracking-tight">Join Session</h2>
+             <p className="text-gray-500 font-bold mb-8 max-w-xs">Enter the ID displayed on the host device.</p>
+             
+             <input
+               type="text"
+               value={inputSessionId}
+               onChange={(e) => setInputSessionId(e.target.value.toUpperCase())}
+               placeholder="SESSION ID"
+               className="w-full px-6 py-4 bg-gray-100 border-4 border-black rounded-xl text-black font-mono text-center text-xl uppercase tracking-[0.2em] focus:bg-white focus:outline-none focus:ring-4 focus:ring-pink-500/20 placeholder:text-gray-400 mb-6"
+             />
+             
+             <button
+               onClick={handleManualConnect}
+               className="w-full py-4 bg-black text-white font-black uppercase tracking-widest rounded-xl hover:bg-gray-800 active:scale-95 transition-all shadow-[4px_4px_0px_0px_rgba(236,72,153,1)] hover:translate-y-1 hover:shadow-[2px_2px_0px_0px_rgba(236,72,153,1)]"
+             >
+               Connect Now
+             </button>
+             
+             <p className="text-xs font-bold text-gray-400 mt-6 uppercase tracking-wider">
+               Scan QR or Enter Code
+             </p>
+           </div>
         </div>
       </div>
     );
@@ -141,67 +153,91 @@ const SenderView = () => {
 
   // --- RENDER: CONNECTED (Upload Screen) ---
   return (
-    <div className="text-center max-w-md mx-auto">
-      {/* Connection Header */}
-      <div className="bg-zinc-900/80 border border-zinc-800 p-4 rounded-2xl backdrop-blur-md mb-6 flex items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
-            <div className="bg-emerald-500/20 p-2 rounded-full animate-pulse">
-                <Wifi size={20} className="text-emerald-400" />
+    <div className="min-h-screen bg-indigo-950 font-sans selection:bg-pink-500 selection:text-white flex items-center justify-center p-4">
+      {/* Background Pattern */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#4f46e5_2px,transparent_2px),linear-gradient(to_bottom,#4f46e5_2px,transparent_2px)] bg-[size:3rem_3rem] opacity-10 pointer-events-none" />
+
+      <div className="w-full max-w-md relative z-10 animate-in fade-in slide-in-from-bottom-8 duration-500">
+        
+        {/* Shadow Block */}
+        <div className="absolute inset-0 bg-black rounded-[2.5rem] translate-x-3 translate-y-3" />
+
+        <div className="relative bg-indigo-100 border-4 border-black rounded-[2.5rem] overflow-hidden flex flex-col">
+          
+          {/* Header */}
+          <div className="bg-yellow-400 border-b-4 border-black p-6 flex items-center justify-between">
+             <div className="flex items-center gap-3">
+               <div className="relative">
+                 <span className="absolute inset-0 bg-green-500 animate-ping rounded-full opacity-50"></span>
+                 <div className="relative w-10 h-10 bg-black text-green-400 rounded-lg flex items-center justify-center border-2 border-black">
+                   <Wifi size={20} strokeWidth={3} />
+                 </div>
+               </div>
+               <div className="text-left leading-tight">
+                 <p className="text-[10px] font-black uppercase tracking-widest text-black/60">Connected To</p>
+                 <p className="text-xl font-mono font-black text-black tracking-widest">{sessionId}</p>
+               </div>
+             </div>
+          </div>
+
+          <div className="p-8">
+            
+            {/* Big Upload Area */}
+            <div className="relative group mb-8">
+              <label className={`
+                 relative block w-full aspect-square rounded-3xl border-4 border-black border-dashed cursor-pointer overflow-hidden transition-all duration-300
+                 ${uploadStatus === 'idle' ? 'bg-white hover:bg-pink-50 hover:border-pink-500' : ''}
+                 ${uploadStatus === 'uploading' ? 'bg-indigo-50 border-indigo-400' : ''}
+                 ${uploadStatus === 'success' ? 'bg-green-50 border-green-500' : ''}
+              `}>
+                <input type="file" multiple className="hidden" onChange={handleFileSelect} disabled={uploadStatus === 'uploading'} />
+                
+                <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
+                  
+                  {uploadStatus === 'idle' && (
+                    <motion.div initial={{ scale: 0.9 }} animate={{ scale: 1 }} className="flex flex-col items-center">
+                       <div className="w-20 h-20 bg-pink-500 text-white rounded-2xl flex items-center justify-center border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] mb-4 group-hover:scale-110 transition-transform">
+                         <UploadCloud size={40} strokeWidth={2.5} />
+                       </div>
+                       <p className="text-2xl font-black text-black uppercase leading-none mb-2">Tap to Upload</p>
+                       <p className="text-sm font-bold text-gray-400">Select up to 7 files</p>
+                    </motion.div>
+                  )}
+
+                  {uploadStatus === 'uploading' && (
+                    <div className="flex flex-col items-center">
+                       <Loader2 size={60} className="text-indigo-600 animate-spin mb-4" strokeWidth={2.5} />
+                       <p className="text-xl font-black text-indigo-900 uppercase animate-pulse">Transmitting...</p>
+                    </div>
+                  )}
+
+                  {uploadStatus === 'success' && (
+                    <motion.div initial={{ scale: 0.5, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="flex flex-col items-center">
+                       <div className="w-20 h-20 bg-green-500 text-white rounded-full flex items-center justify-center border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] mb-4">
+                         <CheckCircle size={40} strokeWidth={3} />
+                       </div>
+                       <p className="text-2xl font-black text-green-700 uppercase">Sent Successfully!</p>
+                    </motion.div>
+                  )}
+                </div>
+              </label>
             </div>
-            <div className="text-left">
-                <p className="text-xs text-zinc-500 uppercase font-mono">Linked to Terminal</p>
-                <p className="text-lg font-bold font-mono text-cyan-400 tracking-widest">{sessionId}</p>
-            </div>
+
+            {/* Disconnect Button */}
+            <button 
+              onClick={handleDisconnect}
+              className="w-full py-4 bg-white border-4 border-black rounded-xl font-black uppercase tracking-widest text-red-500 hover:bg-red-50 hover:text-red-600 active:translate-y-1 transition-all flex items-center justify-center gap-2 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none"
+            >
+              <LogOut size={20} strokeWidth={3} />
+              Disconnect
+            </button>
+            
+            <p className="text-[10px] font-bold text-indigo-900/40 text-center mt-6 uppercase tracking-wider">
+              Secure P2P Channel Active
+            </p>
+          </div>
         </div>
       </div>
-
-      {/* Big Upload Button Area */}
-      <div className="relative group mb-6">
-        <div className={`absolute -inset-0.5 bg-gradient-to-r ${uploadStatus === 'success' ? 'from-emerald-500 to-green-600' : 'from-cyan-500 to-blue-600'} rounded-3xl blur opacity-30 group-hover:opacity-60 transition duration-500`}></div>
-        
-        <label className="relative block bg-zinc-900/90 border border-zinc-700/50 hover:border-cyan-500/50 p-12 rounded-3xl cursor-pointer transition-all overflow-hidden">
-          <input type="file" multiple className="hidden" onChange={handleFileSelect} disabled={uploadStatus === 'uploading'} />
-          
-          <div className="flex flex-col items-center justify-center gap-4">
-            {uploadStatus === 'idle' && (
-                <>
-                 <UploadCloud size={64} className="text-cyan-500 group-hover:scale-110 transition-transform duration-300" />
-                 <div>
-                    <p className="text-xl font-bold text-zinc-100">Tap to Transmit</p>
-                    <p className="text-sm text-zinc-500 mt-2">Select files (hold Ctrl to select multiple)</p>
-                 </div>
-                </>
-            )}
-
-            {uploadStatus === 'uploading' && (
-                <>
-                 <Loader2 size={64} className="text-cyan-400 animate-spin" />
-                 <p className="text-lg font-mono text-cyan-400 animate-pulse">TRANSMITTING...</p>
-                </>
-            )}
-
-            {uploadStatus === 'success' && (
-                <>
-                 <CheckCircle size={64} className="text-emerald-400 animate-in zoom-in duration-300" />
-                 <p className="text-lg font-bold text-emerald-400">Sent!</p>
-                </>
-            )}
-          </div>
-        </label>
-      </div>
-
-      {/* Disconnect Button - Clearly Visible */}
-      <button 
-        onClick={handleDisconnect}
-        className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-400 font-bold rounded-xl transition-all duration-200"
-      >
-        <LogOut size={18} />
-        Disconnect Session
-      </button>
-      
-      <p className="text-xs text-zinc-600 mt-6 px-4">
-        Privacy Note: Files are streamed directly to the terminal browser and are not saved on cloud servers.
-      </p>
     </div>
   );
 };

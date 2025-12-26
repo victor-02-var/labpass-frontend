@@ -1,14 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import { socket } from '../services/socket';
 import { QRCodeSVG } from 'qrcode.react';
-import { Trash2, Download, Smartphone, ShieldAlert, CheckCircle, Loader2, FileIcon, Link2, Share2, Clock } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { 
+  Trash2, Download, Smartphone, ShieldAlert, CheckCircle, 
+  Loader2, FileIcon, Link2, Share2, Clock, Zap 
+} from 'lucide-react';
 
-const AUTO_DELETE_MS = 3 * 60 * 1000; // 3 Minutes in milliseconds
+const AUTO_DELETE_MS = 3 * 60 * 1000; // 3 Minutes
 
 const HostView = ({ sessionId }) => {
   const [isConnected, setIsConnected] = useState(false);
   const [receivedFiles, setReceivedFiles] = useState([]);
-  const [now, setNow] = useState(Date.now()); // Used to trigger re-renders for the countdown
+  const [now, setNow] = useState(Date.now());
 
   // IMPORTANT: Replace with your actual Frontend URL
   const FRONTEND_URL = "https://labpass-frontend.vercel.app"; 
@@ -27,10 +31,9 @@ const HostView = ({ sessionId }) => {
     });
 
     socket.on("receive-file", (fileData) => {
-      // Add an ID and Expiry Timestamp to every new file
       const newFile = {
         ...fileData,
-        id: Date.now() + Math.random(), // Unique ID
+        id: Date.now() + Math.random(),
         receivedAt: Date.now(),
         expiresAt: Date.now() + AUTO_DELETE_MS
       };
@@ -52,24 +55,18 @@ const HostView = ({ sessionId }) => {
     };
   }, [sessionId]);
 
-  // Timer Effect: Updates 'now' every second and filters out expired files
   useEffect(() => {
     const interval = setInterval(() => {
       const currentTime = Date.now();
       setNow(currentTime);
-
       setReceivedFiles(prevFiles => {
-        // Filter out files where expiresAt has passed
         const validFiles = prevFiles.filter(f => f.expiresAt > currentTime);
-        
-        // Only update state if files were actually removed (prevents unnecessary re-renders)
         if (validFiles.length !== prevFiles.length) {
           return validFiles;
         }
         return prevFiles;
       });
     }, 1000);
-
     return () => clearInterval(interval);
   }, []);
 
@@ -87,14 +84,12 @@ const HostView = ({ sessionId }) => {
     document.body.removeChild(link);
   };
 
-  // Helper to calculate width of the progress bar
   const getProgressWidth = (expiresAt) => {
     const timeLeft = expiresAt - now;
     const percentage = (timeLeft / AUTO_DELETE_MS) * 100;
     return Math.max(0, Math.min(100, percentage));
   };
 
-  // Helper to format time left text
   const formatTimeLeft = (expiresAt) => {
     const secondsLeft = Math.max(0, Math.ceil((expiresAt - now) / 1000));
     const mins = Math.floor(secondsLeft / 60);
@@ -103,117 +98,134 @@ const HostView = ({ sessionId }) => {
   };
 
   return (
-    <div className="w-full max-w-md mx-auto animate-in fade-in slide-in-from-bottom-8 duration-700 pt-24 pb-12 px-4">
+    <div className="min-h-screen bg-indigo-950 font-sans selection:bg-pink-500 selection:text-white relative overflow-x-hidden flex items-center justify-center p-4">
       
-      <div className="relative group">
-        <div className={`absolute -inset-1 bg-gradient-to-b ${isConnected ? 'from-emerald-500/20' : 'from-cyan-500/20'} to-transparent rounded-[2.5rem] blur-2xl opacity-50 group-hover:opacity-70 transition-opacity duration-500`} />
+      {/* --- BACKGROUND PATTERN --- */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#4f46e5_2px,transparent_2px),linear-gradient(to_bottom,#4f46e5_2px,transparent_2px)] bg-[size:3rem_3rem] opacity-10 pointer-events-none -z-10" />
+      
+      {/* --- MAIN CARD CONTAINER --- */}
+      <div className="w-full max-w-md relative animate-in fade-in zoom-in-95 duration-500">
         
-        <div className="relative bg-zinc-900/40 backdrop-blur-2xl border border-zinc-800/50 rounded-[2.5rem] overflow-hidden shadow-3xl">
+        {/* Decorative Card Shadow Block */}
+        <div className="absolute inset-0 bg-black rounded-[2.5rem] translate-x-3 translate-y-3" />
+
+        {/* Changed bg-white to bg-indigo-100 for theme consistency */}
+        <div className="relative bg-indigo-100 border-4 border-black rounded-[2.5rem] overflow-hidden flex flex-col">
           
-          <div className="p-6 border-b border-zinc-800/50 bg-zinc-950/30 flex items-center justify-between">
+          {/* HEADER: Status Bar (Kept Yellow for contrast) */}
+          <div className="p-6 border-b-4 border-black bg-yellow-400 flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="relative">
-                {isConnected && (
-                  <span className="absolute inset-0 rounded-full bg-emerald-500 animate-ping opacity-20" />
-                )}
-                <div className={`w-10 h-10 rounded-xl flex items-center justify-center border transition-all duration-500 ${
-                  isConnected ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : 'bg-zinc-800/50 border-zinc-700 text-zinc-500'
-                }`}>
-                  {isConnected ? <CheckCircle size={20} /> : <Loader2 size={20} className="animate-spin" />}
-                </div>
+              <div className={`w-12 h-12 border-4 border-black rounded-xl flex items-center justify-center bg-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-colors ${isConnected ? 'text-green-600' : 'text-gray-400'}`}>
+                {isConnected ? <CheckCircle size={24} strokeWidth={3} /> : <Loader2 size={24} className="animate-spin" strokeWidth={3} />}
               </div>
               <div>
-                <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-zinc-500 leading-none mb-1">Status</p>
-                <p className={`text-sm font-black tracking-tight ${isConnected ? 'text-white' : 'text-zinc-400'}`}>
-                  {isConnected ? 'UPLINK_LIVE' : 'WAITING_FOR_SENDER'}
-                </p>
+                <p className="text-xs font-black uppercase tracking-widest text-black/60 mb-1">System Status</p>
+                <div className={`inline-block px-2 py-0.5 border-2 border-black rounded text-xs font-black uppercase tracking-tight ${isConnected ? 'bg-green-500 text-white' : 'bg-white text-black'}`}>
+                  {isConnected ? 'LINK_ESTABLISHED' : 'WAITING_SIGNAL'}
+                </div>
               </div>
             </div>
-            <Smartphone className={isConnected ? 'text-emerald-400' : 'text-zinc-800'} size={24} />
+            <div className="w-10 h-10 bg-black rounded-full flex items-center justify-center text-yellow-400">
+              <Smartphone size={20} />
+            </div>
           </div>
 
-          <div className="p-10 flex flex-col items-center">
-            <div className="relative p-1">
-              <div className="absolute -top-2 -left-2 w-6 h-6 border-t-2 border-l-2 border-cyan-500/50 rounded-tl-lg" />
-              <div className="absolute -bottom-2 -right-2 w-6 h-6 border-b-2 border-r-2 border-cyan-500/50 rounded-br-lg" />
-              
-              <div className="p-4 bg-white rounded-2xl shadow-[0_0_50px_rgba(34,211,238,0.15)] transition-all duration-500 hover:scale-[1.02]">
-                <QRCodeSVG value={shareUrl} size={180} level="H" />
+          {/* BODY: QR & Files - Changed bg-white to bg-indigo-100 */}
+          <div className="p-8 flex flex-col items-center bg-indigo-100">
+            
+            {/* QR Code Section */}
+            <div className="relative group mb-8">
+              <div className="absolute inset-0 bg-pink-500 rounded-2xl translate-x-2 translate-y-2 border-4 border-black" />
+              <div className="relative p-4 bg-white border-4 border-black rounded-2xl transition-transform hover:-translate-y-1 hover:translate-x-1">
+                <QRCodeSVG value={shareUrl} size={160} level="H" />
               </div>
             </div>
             
-            <div className="mt-10 text-center">
-              <p className="text-[10px] font-mono text-zinc-600 uppercase tracking-[0.4em] mb-2 flex items-center justify-center gap-2">
-                <Link2 size={12} /> Session ID
-              </p>
-              <div className="px-6 py-3 bg-zinc-950/50 border border-zinc-800 rounded-xl">
-                <p className="text-2xl font-black text-white tracking-[0.3em] font-mono select-all">
-                  {sessionId}
-                </p>
+            {/* Session ID Box */}
+            <div className="w-full mb-8">
+              <div className="flex items-center justify-center gap-2 mb-2 text-indigo-900/60">
+                <Link2 size={14} />
+                <span className="text-[10px] font-black uppercase tracking-[0.2em]">Secure ID</span>
+              </div>
+              <div className="bg-black text-white p-4 rounded-xl text-center border-4 border-black shadow-[4px_4px_0px_0px_#a855f7]">
+                <p className="text-xl font-mono tracking-widest font-bold select-all">{sessionId}</p>
               </div>
             </div>
-          </div>
 
-          <div className="px-8 pb-8">
-            {receivedFiles.length > 0 ? (
-              <div className="space-y-4">
-                {receivedFiles.map((file) => (
-                  <div key={file.id} className="relative overflow-hidden bg-cyan-400 text-zinc-950 rounded-[2rem] p-5 shadow-[0_20px_40px_rgba(34,211,238,0.2)] animate-in zoom-in-95 duration-300">
-                    {/* Auto-delete Progress Bar Background */}
-                    <div 
-                        className="absolute bottom-0 left-0 h-1.5 bg-zinc-950/20 transition-all duration-1000 ease-linear"
-                        style={{ width: `${getProgressWidth(file.expiresAt)}%` }}
-                    />
+            {/* File List Area */}
+            <div className="w-full space-y-4">
+              {receivedFiles.length > 0 ? (
+                receivedFiles.map((file) => (
+                  <motion.div 
+                    initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                    animate={{ scale: 1, opacity: 1, y: 0 }}
+                    key={file.id} 
+                    // Changed bg-purple-100 to bg-white for better contrast against the new indigo background
+                    className="relative bg-white border-4 border-black rounded-2xl overflow-hidden shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
+                  >
+                    {/* Auto-delete Progress Bar */}
+                    <div className="absolute bottom-0 left-0 h-2 bg-black w-full z-0">
+                       <div 
+                         className="h-full bg-pink-500 transition-all duration-1000 ease-linear origin-left"
+                         style={{ width: `${getProgressWidth(file.expiresAt)}%` }}
+                       />
+                    </div>
 
-                    <div className="flex items-center gap-4 relative z-10">
-                      <div className="w-12 h-12 bg-zinc-950/10 rounded-2xl flex items-center justify-center">
-                        <FileIcon size={24} />
+                    <div className="relative z-10 p-4 flex items-center gap-4">
+                      <div className="w-12 h-12 bg-indigo-100 border-4 border-black rounded-lg flex items-center justify-center text-indigo-600 flex-shrink-0">
+                        <FileIcon size={24} strokeWidth={2.5} />
                       </div>
+                      
                       <div className="flex-grow min-w-0">
-                        <div className="flex items-center gap-2 mb-0.5">
-                            <Clock size={10} className="text-zinc-900/60" />
-                            <p className="text-[10px] font-mono uppercase font-black tracking-widest opacity-60">
-                                Expires in {formatTimeLeft(file.expiresAt)}
-                            </p>
-                        </div>
-                        <p className="font-bold truncate text-sm">{file.name}</p>
+                         <div className="flex items-center gap-2 mb-1">
+                            <Clock size={12} className="text-black" />
+                            <span className="text-[10px] font-black uppercase tracking-wider text-black">
+                               {formatTimeLeft(file.expiresAt)} Left
+                            </span>
+                         </div>
+                         <p className="font-bold text-black text-sm truncate pr-2">{file.name}</p>
                       </div>
+
                       <button 
                         onClick={() => downloadFile(file)}
-                        className="w-12 h-12 bg-white text-zinc-950 rounded-full flex items-center justify-center hover:scale-110 active:scale-90 transition-all shadow-xl"
+                        className="w-12 h-12 bg-green-400 border-4 border-black rounded-full flex items-center justify-center hover:bg-green-300 active:translate-y-1 transition-all shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
                       >
-                        <Download size={20} />
+                        <Download size={20} className="text-black" strokeWidth={3} />
                       </button>
                     </div>
+                  </motion.div>
+                ))
+              ) : (
+                // Updated empty state colors to blend better with indigo background
+                <div className="border-4 border-dashed border-indigo-300/50 rounded-2xl p-8 text-center bg-white/40">
+                  <div className="w-16 h-16 bg-indigo-200 rounded-full flex items-center justify-center mx-auto mb-3 text-indigo-600">
+                    <Share2 size={32} />
                   </div>
-                ))}
-              </div>
-            ) : (
-              <div className="group/drop border-2 border-dashed border-zinc-800 hover:border-zinc-700 transition-colors rounded-[2rem] p-10 text-center relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-b from-cyan-500/0 to-cyan-500/5 opacity-0 group-hover/drop:opacity-100 transition-opacity" />
-                <Share2 className="mx-auto mb-4 text-zinc-700 group-hover/drop:text-cyan-500 transition-colors" size={32} />
-                <p className="text-zinc-500 text-[10px] font-mono uppercase tracking-[0.3em] font-bold">
-                  Awaiting Incoming Data
-                </p>
-              </div>
-            )}
+                  <p className="text-xs font-black text-indigo-900/50 uppercase tracking-widest">
+                    Awaiting Data Stream
+                  </p>
+                </div>
+              )}
+            </div>
 
-            <div className="mt-10 space-y-4">
+            {/* Footer / Actions */}
+            <div className="mt-10 w-full">
               <button 
                 onClick={handleNuke}
-                className="w-full group/nuke flex items-center justify-center gap-3 py-4 bg-rose-500/5 hover:bg-rose-600 border border-rose-500/20 hover:border-rose-500 rounded-2xl transition-all duration-500"
+                className="w-full group relative py-4 bg-red-500 text-white border-4 border-black rounded-xl font-black uppercase tracking-widest shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-1 hover:shadow-none active:bg-red-600 transition-all flex items-center justify-center gap-3"
               >
-                <Trash2 size={16} className="text-rose-500 group-hover/nuke:text-white transition-colors group-hover/nuke:rotate-12" />
-                <span className="text-[11px] font-black uppercase tracking-[0.2em] text-rose-500 group-hover/nuke:text-white">Destroy Session</span>
+                <Trash2 size={20} strokeWidth={3} />
+                Terminate Session
               </button>
               
-              <div className="flex items-center justify-center gap-2 px-4 text-center">
-                <ShieldAlert size={12} className="text-zinc-600" />
-                <p className="text-[9px] text-zinc-600 font-mono uppercase tracking-widest leading-relaxed">
-                  Auto-wipe enabled (3m). Data resides in RAM only.
+              <div className="mt-6 flex items-center justify-center gap-2 opacity-60 font-mono">
+                <ShieldAlert size={14} className="text-indigo-900" />
+                <p className="text-[10px] font-bold text-indigo-900 uppercase tracking-wider">
+                  RAM-only storage. Auto-wipes in 3m.
                 </p>
               </div>
             </div>
+
           </div>
         </div>
       </div>
