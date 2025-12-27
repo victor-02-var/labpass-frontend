@@ -34,12 +34,12 @@ const Reveal = ({ children, delay = 0, width = "100%" }) => (
 const testimonials = [
   {
     id: 1,
-    name: "Arjun Verma",
+    name: "Ritika Verma",
     role: "B.Tech CSE",
     company: "Final Year Student",
     content: "Forgot my pendrive during the Data Structures practical. Beamed the code from my phone to the lab PC instantly just 5 mins before the internal submission. Literally saved my grades.",
     rating: 5,
-    avatarColor: "bg-green-400"
+    avatarUrl:"/testimonial_pic.png"
   },
   {
     id: 2,
@@ -48,16 +48,16 @@ const testimonials = [
     company: "Pharmacy Dept",
     content: "The Xerox shop PC near college is always full of viruses. I stopped logging into my email there. Now I just use LabPass to send my assignment PDFs for printing. It's so much safer.",
     rating: 5,
-    avatarColor: "bg-purple-400"
+   avatarUrl:"/pic.webp"
   },
 {
     id: 3,
-    name: "Rohan Das",
+    name: "Bhumi Das",
     role: "Mechanical Eng.",
     company: "3rd Year Student",
     content: "Honestly, I just use it because Bluetooth is too slow for 50MB lab reports and I hate logging into my Google Drive on public lab computers. It does one thing and does it well.",
     rating: 5,
-    avatarColor: "bg-pink-400"
+    avatarUrl:"/sak.webp"
   }
 ];
 
@@ -393,13 +393,19 @@ const AnimatedReviews = () => {
                   </div>
                 </div>
                 <div className="flex items-center gap-4 border-t-4 border-gray-100 pt-6 mt-4">
-                  <div className={`h-16 w-16 ${testimonials[activeIndex].avatarColor} border-4 border-black rounded-xl flex items-center justify-center text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,0.2)]`}>
-                    <User size={32} strokeWidth={2.5} />
+                  {/* --- UPDATED: Avatar Image Section --- */}
+                  <div className="h-16 w-16 border-4 border-black rounded-xl overflow-hidden shadow-[4px_4px_0px_0px_rgba(0,0,0,0.2)] relative bg-gray-200">
+                    <img 
+                        src={testimonials[activeIndex].avatarUrl} 
+                        alt={testimonials[activeIndex].name}
+                        className="w-full h-full object-cover"
+                    />
                   </div>
+                  {/* ----------------------------------- */}
                   <div>
                     <h3 className="font-black text-black text-xl uppercase">{testimonials[activeIndex].name}</h3>
                     <p className="text-sm font-bold text-indigo-500 bg-indigo-100 px-2 py-0.5 rounded inline-block">
-                       {testimonials[activeIndex].role}
+                        {testimonials[activeIndex].role}
                     </p>
                   </div>
                 </div>
