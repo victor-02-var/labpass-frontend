@@ -181,8 +181,8 @@ function App() {
         </div>
       </main>
 
-      {/* --- FOOTER (Solid Block) --- */}
-      <footer className="w-full py-12 px-6 bg-black text-white border-t-4 border-indigo-500 relative z-50">
+      {/* --- FOOTER (Indigo Theme) --- */}
+      <footer className="w-full py-12 px-6 bg-indigo-900 text-yellow-400 border-t-2 border-yellow-500 relative z-50">
         <div className="max-w-6xl mx-auto flex flex-col items-center">
           
           <div className="flex flex-wrap justify-center gap-x-12 gap-y-6 mb-10">
@@ -192,13 +192,9 @@ function App() {
             <FooterLink label="Terms" isActive={currentView === 'terms'} onClick={() => setCurrentView('terms')} />
           </div>
           
-          <div className="flex flex-col md:flex-row items-center justify-between w-full border-t-2 border-zinc-800 pt-8 gap-6 text-[10px] font-mono">
-            <p className="tracking-[0.2em] text-zinc-500">© 2025 LABPASS TERMINAL // LEVEL_1</p>
-            <div className="flex items-center gap-2 px-3 py-1 bg-zinc-900 rounded border border-zinc-700">
-               <Gamepad2 size={12} className="text-pink-500" /> 
-               <span className="text-zinc-400">SERVER STATUS:</span> 
-               <span className="text-green-500 font-bold">STABLE</span>
-            </div>
+          <div className="flex flex-col md:flex-row items-center justify-center w-full border-t border-yellow-500/50 pt-8 gap-6 text-xs font-mono">
+            <p className="tracking-[0.2em] text-yellow-300">© 2025 LABPASS TERMINAL // LEVEL_1</p>
+      
           </div>
         </div>
       </footer>
@@ -218,7 +214,7 @@ const MetadataItem = ({ label, value, icon, dark }) => (
 const FooterLink = ({ label, isActive, onClick }) => (
   <button 
     onClick={onClick} 
-    className={`text-xs uppercase tracking-[0.2em] font-black transition-all hover:-translate-y-1 ${isActive ? 'text-pink-500' : 'text-zinc-400 hover:text-white'}`}
+    className={`text-sm uppercase tracking-[0.2em] font-black transition-all hover:-translate-y-1 ${isActive ? 'text-pink-500' : 'text-zinc-400 hover:text-white'}`}
   >
     {label}
   </button>
